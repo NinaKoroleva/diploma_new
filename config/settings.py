@@ -25,13 +25,12 @@ INSTALLED_APPS = [
 AUTH_USER_MODEL = 'backend.User'
 
 MIDDLEWARE = [
-    'django.middleware.security.SecurityMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    "django.middleware.security.SecurityMiddleware",
+    "django.contrib.sessions.middleware.SessionMiddleware",
+    "django.middleware.common.CommonMiddleware",
+    "django.middleware.csrf.CsrfViewMiddleware",
+    "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "django.contrib.messages.middleware.MessageMiddleware",
 ]
 
 # URL
@@ -63,13 +62,13 @@ WSGI_APPLICATION = 'config.wsgi.application'
 
 
 DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.postgresql",
-        "NAME": os.getenv("POSTGRES_DB", "retail"),
-        "USER": os.getenv("POSTGRES_USER", "postgres"),
-        "PASSWORD": os.getenv("POSTGRES_PASSWORD", "postgres"),
-        "HOST": os.getenv("POSTGRES_HOST", "db"),
-        "PORT": "5432",
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'diploma',
+        'USER': 'postgres',
+        'PASSWORD': 'postgres',
+        'HOST': 'db',
+        'PORT': 5432,
     }
 }
 
@@ -110,6 +109,6 @@ CELERY_RESULT_BACKEND = "redis://redis:6379/0"
 
 REST_FRAMEWORK = {
     "DEFAULT_PERMISSION_CLASSES": [
-        "rest_framework.permissions.IsAuthenticated"
+        "rest_framework.permissions.AllowAny"
     ]
 }

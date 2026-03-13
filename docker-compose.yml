@@ -4,11 +4,7 @@ services:
     image: postgres:15
     restart: always
     environment:
-<<<<<<< HEAD
-      POSTGRES_DB: retail
-=======
       POSTGRES_DB: diploma
->>>>>>> 7dad560 (2)
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
     ports:

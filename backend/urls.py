@@ -1,17 +1,12 @@
-from django.contrib import admin
-from django.urls import path, include
-
-from backend.views import (
+from django.urls import path
+from .views import (
     RegisterView,
     ProductListView,
     BasketView,
-    OrderConfirmView
+    OrderConfirmView,
 )
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('', include('backend.urls')),
-
     path('user/register', RegisterView.as_view()),
     path('products', ProductListView.as_view()),
     path('basket', BasketView.as_view()),

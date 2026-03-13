@@ -1,42 +1,44 @@
 from rest_framework.views import APIView
-from rest_framework.generics import ListAPIView
-from .models import ProductInfo
+from .models import ProductInfo, Product
 from .serializers import ProductSerializer
 from rest_framework.response import Response
 from django.contrib.auth import get_user_model
 from django.core.mail import send_mail
+from .models import Order, OrderItem, Contact
+from rest_framework.permissions import AllowAny
 
-
-from .models import (
-    Order,
-    OrderItem,
-    Contact,
-    ProductInfo,
-    Shop,
-    Category
-)
 User = get_user_model()
 
-#Регистрация
+
 class RegisterView(APIView):
 
     permission_classes = []
 
     def post(self, request):
-        data = request.data
-        user = User.objects.create_user(
-            username=request.data["username"],
-            email=request.data["email"],
-            password=request.data["password"],
+
+        username = request.data.get("username")
+        password = request.data.get("password")
+
+        if not username or not password:
+            return Response(
+                {"error": "username and password required"},
+                status=400
+            )
+
+        User.objects.create_user(
+            username=username,
+            password=password
         )
 
-        return Response({"status": "registered"})
+        return Response({"status": "user created"})
 #Товары
-class ProductListView(ListAPIView):
+class ProductListView(APIView):
 
-    queryset = ProductInfo.objects.select_related("product", "shop")
+    def get(self, request):
+        products = Product.objects.all()
+        serializer = ProductSerializer(products, many=True)
 
-    serializer_class = ProductSerializer
+        return Response(serializer.data)
 
 #Корзина
 class BasketView(APIView):
@@ -85,5 +87,7 @@ class ConfirmOrder(APIView):
         return Response({"status": "confirmed"})
 
 
-class OrderConfirmView:
-    pass
+class OrderConfirmView(APIView):
+
+    def post(self, request):
+        return Response({"status": "order confirmed"})
