@@ -1,0 +1,73 @@
+shop: Mobile Store
+
+categories:
+  - id: 1
+    name: Смартфоны
+
+goods:
+
+  - id: 1
+    name: iPhone 14
+    category: 1
+    price: 90000
+    quantity: 10
+    parameters:
+      brand: Apple
+      color: black
+      memory: 128GB
+      screen: 6.1
+
+  - id: 2
+    name: iPhone 14 Pro
+    category: 1
+    price: 120000
+    quantity: 7
+    parameters:
+      brand: Apple
+      color: silver
+      memory: 256GB
+      screen: 6.1
+
+  - id: 3
+    name: Samsung Galaxy S23
+    category: 1
+    price: 85000
+    quantity: 15
+    parameters:
+      brand: Samsung
+      color: green
+      memory: 256GB
+      screen: 6.1
+
+  - id: 4
+    name: Samsung Galaxy A54
+    category: 1
+    price: 42000
+    quantity: 20
+    parameters:
+      brand: Samsung
+      color: black
+      memory: 128GB
+      screen: 6.4
+
+  - id: 5
+    name: Xiaomi 13
+    category: 1
+    price: 65000
+    quantity: 12
+    parameters:
+      brand: Xiaomi
+      color: blue
+      memory: 256GB
+      screen: 6.36
+
+  - id: 6
+    name: Xiaomi Redmi Note 12
+    category: 1
+    price: 25000
+    quantity: 30
+    parameters:
+      brand: Xiaomi
+      color: gray
+      memory: 128GB
+      screen: 6.67
