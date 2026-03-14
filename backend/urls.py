@@ -11,4 +11,5 @@ urlpatterns = [
     path('products', ProductListView.as_view()),
     path('basket', BasketView.as_view()),
     path('order/confirm', OrderConfirmView.as_view()),
+
 ]

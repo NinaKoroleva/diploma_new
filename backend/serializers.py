@@ -1,19 +1,46 @@
 from rest_framework import serializers
-from .models import Product, Order, OrderItem, Contact
+from .models import Product, Order, OrderItem, Contact, ProductInfo
 
 
 class ProductSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Product
-        fields = "__all__"
+        fields = [
+            "id",
+            "name",
+            "description",
+            "category"
+        ]
 
+class ProductInfoSerializer(serializers.ModelSerializer):
 
+    product = ProductSerializer(read_only=True)
+
+    class Meta:
+        model = ProductInfo
+        fields = [
+            "id",
+            "product",
+            "price",
+            "price_rrc",
+            "quantity",
+            "shop"
+        ]
 class OrderItemSerializer(serializers.ModelSerializer):
+
+    product = serializers.CharField(
+        source="product_info.product.name",
+        read_only=True
+    )
 
     class Meta:
         model = OrderItem
-        fields = "__all__"
+        fields = [
+            "id",
+            "product",
+            "quantity"
+        ]
 
 
 class OrderSerializer(serializers.ModelSerializer):
@@ -22,11 +49,22 @@ class OrderSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Order
-        fields = "__all__"
+        fields = [
+            "id",
+            "state",
+            "dt",
+            "items"
+        ]
 
 
 class ContactSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Contact
-        fields = "__all__"
+        fields = [
+            "id",
+            "city",
+            "street",
+            "house",
+            "phone"
+        ]

@@ -2,7 +2,7 @@ import time
 import psycopg2
 import os
 
-DB_NAME = os.getenv("POSTGRES_DB", "retail")
+DB_NAME = os.getenv("POSTGRES_DB", "diploma")
 DB_USER = os.getenv("POSTGRES_USER", "postgres")
 DB_PASSWORD = os.getenv("POSTGRES_PASSWORD", "postgres")
 DB_HOST = os.getenv("POSTGRES_HOST", "db")

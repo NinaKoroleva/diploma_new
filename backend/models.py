@@ -20,7 +20,7 @@ class Category(models.Model):
 
 class Product(models.Model):
     name = models.CharField(max_length=255)
-    price = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal("0.00"))
+    #price = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal("0.00"))
     category = models.ForeignKey('Category', on_delete=models.CASCADE, null=True, blank=True)
     description = models.TextField(blank=True)
 
@@ -65,7 +65,7 @@ class Order(models.Model):
 
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     contact = models.ForeignKey(Contact, on_delete=models.SET_NULL, null=True)
-    state = models.CharField(max_length=20, choices=STATUS)
+    state = models.CharField(max_length=20, choices=STATUS, default="basket")
     dt = models.DateTimeField(auto_now_add=True)
     created_at = models.DateTimeField(default=timezone.now)
 
