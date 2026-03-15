@@ -9,6 +9,8 @@ from rest_framework.permissions import AllowAny
 from django.shortcuts import get_object_or_404
 from rest_framework.permissions import IsAuthenticated
 from django.conf import settings
+from django.http import JsonResponse
+
 
 User = get_user_model()
 
@@ -138,3 +140,17 @@ class OrderConfirmView(APIView):
 
     def post(self, request):
         return Response({"status": "order confirmed"})
+
+
+#для главной страницы
+def api_root(request):
+    return JsonResponse({
+        "message": "Online Store API is running",
+        "endpoints": {
+            "admin": "/admin/",
+            "register": "/user/register",
+            "products": "/products",
+            "basket": "/basket",
+            "order_confirm": "/order/confirm"
+        }
+    })
