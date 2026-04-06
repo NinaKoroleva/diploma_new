@@ -4,7 +4,7 @@ import os
 
 DB_NAME = os.getenv("POSTGRES_DB", "diploma")
 DB_USER = os.getenv("POSTGRES_USER", "postgres")
-DB_PASSWORD = os.getenv("POSTGRES_PASSWORD", "postgres")
+DB_PASSWORD = os.getenv("POSTGRES_PASSWORD", "1234")
 DB_HOST = os.getenv("POSTGRES_HOST", "db")
 
 while True:

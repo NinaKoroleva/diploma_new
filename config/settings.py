@@ -1,6 +1,8 @@
 import os
 from pathlib import Path
 
+
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = "secret"
@@ -64,11 +66,11 @@ WSGI_APPLICATION = 'config.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'diploma',
+        'NAME': 'postgres',
         'USER': 'postgres',
-        'PASSWORD': 'postgres',
-        'HOST': 'db',
-        'PORT': 5432,
+        'PASSWORD': '1234',
+        'HOST': 'localhost',
+        'PORT': '5432',
     }
 }
 
@@ -102,8 +104,12 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # mail
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
+INSTALLED_APPS += [
+    "rest_framework.authtoken",
+]
+
 # Celery
-CELERY_BROKER_URL = "redis://localhost:6379/0"
+CELERY_BROKER_URL = 'redis://redis:6379/0'
 CELERY_RESULT_BACKEND = "redis://redis:6379/0"
 
 
@@ -112,3 +118,7 @@ REST_FRAMEWORK = {
         "rest_framework.permissions.AllowAny"
     ]
 }
+
+
+SECRET_KEY = os.getenv("SECRET_KEY")
+DB_PASSWORD = os.getenv("POSTGRES_PASSWORD")

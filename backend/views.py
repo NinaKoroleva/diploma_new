@@ -1,88 +1,100 @@
-from rest_framework.views import APIView
-from .models import ProductInfo, Product
-from .serializers import ProductSerializer, ProductInfoSerializer
-from rest_framework.response import Response
-from django.contrib.auth import get_user_model
-from django.core.mail import send_mail
-from .models import Order, OrderItem, Contact
-from rest_framework.permissions import AllowAny
-from django.shortcuts import get_object_or_404
-from rest_framework.permissions import IsAuthenticated
-from django.conf import settings
+from rest_framework.viewsets import ModelViewSet
 from django.http import JsonResponse
+from rest_framework.views import APIView
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.decorators import action
+from rest_framework.response import Response
+from django.shortcuts import get_object_or_404
+from django.contrib.auth import get_user_model
 
+from .models import ProductInfo, Order, OrderItem, Contact
+from .serializers import (
+    ProductInfoSerializer,
+    OrderSerializer,
+    ContactSerializer
+)
 
 User = get_user_model()
 
 
-class RegisterView(APIView):
+#товары
+class ProductViewSet(ModelViewSet):
 
-    permission_classes = []
+    queryset = ProductInfo.objects.select_related(
+        "product",
+        "shop"
+    )
+    serializer_class = ProductInfoSerializer
 
-    def post(self, request):
+    def get_queryset(self):
 
-        username = request.data.get("username")
-        password = request.data.get("password")
+        queryset = super().get_queryset()
 
-        if User.objects.filter(username=username).exists():
-            return Response(
-                {"error": "user exists"},
-                status=400
-            )
+        category = self.request.query_params.get("category")
+        shop = self.request.query_params.get("shop")
+        search = self.request.query_params.get("search")
 
-
-        try:
-            User.objects.create_user(
-                username=username,
-                password=password
-            )
-        except Exception as e:
-            return Response(
-                {"error": str(e)},
-                status=400
-            )
-
-
-        return Response({"status": "user created"})
-#Товары
-class ProductListView(APIView):
-
-    def get(self, request):
-
-        products = ProductInfo.objects.select_related(
-            "product",
-            "shop"
-        )
-        products = products.order_by("price")
-        category = request.GET.get("category")
-        shop = request.GET.get("shop")
-        search = request.GET.get("search")
-
-        if search:
-            products = products.filter(
-                product__name__icontains=search
-            )
         if category:
-            products = products.filter(product__category_id=category)
+            queryset = queryset.filter(
+                product__category_id=category
+            )
 
         if shop:
-            products = products.filter(shop_id=shop)
+            queryset = queryset.filter(
+                shop_id=shop
+            )
 
-        serializer = ProductInfoSerializer(products, many=True)
+        if search:
+            queryset = queryset.filter(
+                product__name__icontains=search
+            )
+
+        return queryset
+
+
+# корзина и заказы
+class OrderViewSet(ModelViewSet):
+
+    serializer_class = OrderSerializer
+    permission_classes = [IsAuthenticated]
+    queryset = Order.objects.all()
+    def get_queryset(self):
+        return Order.objects.filter(user=self.request.user)
+
+    # текущая корзина
+    @action(detail=False, methods=["get"])
+    def basket(self, request):
+
+        order, _ = Order.objects.get_or_create(
+            user=request.user,
+            state="basket"
+        )
+        try:
+            product_id = request.data.get("product")
+            quantity = int(request.data.get("quantity", 1))
+        except (TypeError, ValueError):
+            return Response(
+                {"error": "invalid input"},
+                status=400
+            )
+
+        serializer = self.get_serializer(order)
 
         return Response(serializer.data)
 
-#Корзина
-class BasketView(APIView):
-    permission_classes = [IsAuthenticated]
-    def post(self, request):
+    #добавить товар
+    @action(detail=False, methods=["post"])
+    def add(self, request):
 
         order, _ = Order.objects.get_or_create(
             user=request.user,
             state="basket"
         )
 
-        product = get_object_or_404(ProductInfo, id=request.data["product"])
+        product = get_object_or_404(
+            ProductInfo,
+            id=request.data.get("product")
+        )
 
         try:
             quantity = int(request.data.get("quantity", 1))
@@ -94,63 +106,87 @@ class BasketView(APIView):
 
         item, created = OrderItem.objects.get_or_create(
             order=order,
-            product_info=product,
+            product_info=product
         )
+
         if not created:
             item.quantity += quantity
         else:
             item.quantity = quantity
+
         item.save()
+
         return Response({"status": "added"})
 
-#Подтверждение
+    #удалить товар
+    @action(detail=False, methods=["post"])
+    def remove(self, request):
 
-class ConfirmOrder(APIView):
+        item_id = request.data.get("item")
 
-    def post(self, request):
+        OrderItem.objects.filter(
+            id=item_id,
+            order__user=request.user,
+            order__state="basket"
+        ).delete()
 
-        order = Order.objects.get(
+        return Response({"status": "deleted"})
+
+    # подтвердить заказ
+    @action(detail=False, methods=["post"])
+    def confirm(self, request):
+
+        order = get_object_or_404(
+            Order,
             user=request.user,
             state="basket"
         )
 
+        if not order.items.exists():
+            return Response(
+                {"error": "basket empty"},
+                status=400
+            )
+
         contact = get_object_or_404(
             Contact,
-            id=request.data["contact"],
-            user=request.user)
+            id=request.data.get("contact"),
+            user=request.user
+        )
 
         order.contact = contact
         order.state = "new"
         order.save()
 
-        try:
-            send_mail(
-                "Order confirmation",
-                "Ваш заказ принят",
-                settings.DEFAULT_FROM_EMAIL,
-                [request.user.email]
-            )
-        except Exception:
-            pass
-
         return Response({"status": "confirmed"})
 
+    # изменить статус заказа
+    @action(detail=True, methods=["post"])
+    def set_status(self, request, pk=None):
 
-class OrderConfirmView(APIView):
+        order = self.get_object()
 
-    def post(self, request):
-        return Response({"status": "order confirmed"})
+        order.state = request.data.get("state")
+        order.save()
+
+        return Response({"status": "updated"})
+
+    def export_products(request):
+
+        data = list(ProductInfo.objects.values())
+
+        return JsonResponse(data, safe=False)
+
+# КОНТАКТЫ
+class ContactViewSet(ModelViewSet):
+
+    serializer_class = ContactSerializer
+    permission_classes = [IsAuthenticated]
+    queryset = Contact.objects.all()
+    def get_queryset(self):
+        return Contact.objects.filter(user=self.request.user)
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
 
 
-#для главной страницы
-def api_root(request):
-    return JsonResponse({
-        "message": "Online Store API is running",
-        "endpoints": {
-            "admin": "/admin/",
-            "register": "/user/register",
-            "products": "/products",
-            "basket": "/basket",
-            "order_confirm": "/order/confirm"
-        }
-    })
