@@ -73,7 +73,7 @@ DATABASES = {
         'PORT': '5432',
     }
 }
-
+SECRET_KEY = os.getenv('SECRET_KEY')
 
 # Password
 

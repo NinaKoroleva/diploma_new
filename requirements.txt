@@ -7,3 +7,4 @@ redis
 django-filter
 python-dotenv
 PyYAML
+gunicorn
