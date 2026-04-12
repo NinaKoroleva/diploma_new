@@ -5,8 +5,8 @@ from django.db import models
 class User(AbstractUser):
 
     TYPE_CHOICES = (
-        ("buyer", "Buyer"),
-        ("supplier", "Supplier"),
+        ("buyer", "Покупатель"),
+        ("supplier", "Поставщик"),
     )
 
     type = models.CharField(
